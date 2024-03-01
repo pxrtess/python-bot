@@ -27,72 +27,71 @@ total_linhas = len(dados_consulta)
 progresso = tqdm(total=total_linhas, desc='Progresso')
 for linha in dados_consulta.itertuples():
     progresso.update(1)
-    if progresso.n < 1119:
-        pass
     pyperclip.copy('')
-    if len(linha.ds_cpf) == 11:
-        chrome_options = Options()
-        chrome_options.add_experimental_option("detach", True)
-        navegador = webdriver.Chrome(service=servico, options=chrome_options)
-        navegador.get(url)
-        navegador.find_element(By.ID, 'id_clear').click()
-        navegador.find_element(By.ID, 'txtCPF').click()
-        navegador.find_element(By.ID, 'txtCPF').send_keys(linha.ds_cpf)
-        navegador.find_element(By.ID, 'txtDataNascimento').send_keys(linha.dt_nascimentox)
-        time.sleep(3) 
-        pg.press('tab')
-        time.sleep(1) 
-        pg.press('enter')
-        time.sleep(1) 
-        pg.press('enter')
-        time.sleep(3)
-        navegador.find_element(By.ID, 'id_submit').click()
-        time.sleep(2) 
-        pg.hotkey('ctrl', 'a')
-        pg.hotkey('ctrl', 'c')
-        copied_text = pyperclip.paste()
-        filtered_lines = []
-        errors = []
-        for line in copied_text.split('\n'):
-            if 'No do CPF:' in line:
-                filtered_lines.append(line)
-            elif 'Nome:' in line:
-                filtered_lines.append(line)
-            elif 'Data de Nascimento:' in line:
-                filtered_lines.append(line)
-            elif 'Situação Cadastral:' in line:
-                filtered_lines.append(line)
-            elif 'Data da Inscrição:' in line:
-                filtered_lines.append(line)
-            elif 'Digito Verificador:' in line:
-                filtered_lines.append(line)
-            elif 'CPF incorreto' in line:
-                errors.append("CPF incorreto")
-            elif 'divergente da constante na base de dados' in line:
-                errors.append("Data de Nascimento divergente")
-        filtered_data = {}
-        
-        for line in filtered_lines:
-            field_name, field_value = line.split(': ', 1)
-            filtered_data[field_name] = field_value
-        filtered_data = {key: value.replace('\r', '') for key, value in filtered_data.items()}
-        if filtered_lines != []: 
-            with open(dir_arquivo+'_resultados.csv', 'a', newline='', encoding='utf-8') as file:
-                writer = csv.DictWriter(file, fieldnames=filtered_data.keys())  
-                writer.writerow(filtered_data)
-        if errors != []: 
-            errors_data = {'data_nascimento': linha.dt_nascimentox, 'cpf': linha.ds_cpf,'errors': errors}
-            with open(dir_arquivo+'_erros.csv', 'a', newline='', encoding='utf-8') as file:
-                writer = csv.DictWriter(file, fieldnames=errors_data.keys())  
-                writer.writerow(errors_data)
-        if filtered_lines == [] and errors == []:
-            errors.append("Erro desconhecido")
-            errors_data = {'data_nascimento': linha.dt_nascimentox, 'cpf': linha.ds_cpf,'errors': errors}
-            with open(dir_arquivo+'_erros.csv', 'a', newline='', encoding='utf-8') as file:
-                writer = csv.DictWriter(file, fieldnames=errors_data.keys())  
-                writer.writerow(errors_data)
-        time.sleep(2)
-        navegador.quit()
-        pass      
+    filtered_lines = []
+    errors = []
+    while filtered_lines == [] and errors == []:
+        if len(linha.ds_cpf) == 11:
+            chrome_options = Options()
+            chrome_options.add_experimental_option("detach", True)
+            navegador = webdriver.Chrome(service=servico, options=chrome_options)
+            navegador.get(url)
+            navegador.find_element(By.ID, 'id_clear').click()
+            navegador.find_element(By.ID, 'txtCPF').click()
+            navegador.find_element(By.ID, 'txtCPF').send_keys(linha.ds_cpf)
+            navegador.find_element(By.ID, 'txtDataNascimento').send_keys(linha.dt_nascimentox)
+            time.sleep(3) 
+            pg.press('tab')
+            time.sleep(1) 
+            pg.press('enter')
+            time.sleep(1) 
+            pg.press('enter')
+            time.sleep(3)
+            navegador.find_element(By.ID, 'id_submit').click()
+            time.sleep(2) 
+            pg.hotkey('ctrl', 'a')
+            pg.hotkey('ctrl', 'c')
+            copied_text = pyperclip.paste()
+            for line in copied_text.split('\n'):
+                if 'No do CPF:' in line:
+                    filtered_lines.append(line)
+                elif 'Nome:' in line:
+                    filtered_lines.append(line)
+                elif 'Data de Nascimento:' in line:
+                    filtered_lines.append(line)
+                elif 'Situação Cadastral:' in line:
+                    filtered_lines.append(line)
+                elif 'Data da Inscrição:' in line:
+                    filtered_lines.append(line)
+                elif 'Digito Verificador:' in line:
+                    filtered_lines.append(line)
+                elif 'CPF incorreto' in line:
+                    errors.append("CPF incorreto")
+                elif 'divergente da constante na base de dados' in line:
+                    errors.append("Data de Nascimento divergente")
+            filtered_data = {}
+            
+            for line in filtered_lines:
+                field_name, field_value = line.split(': ', 1)
+                filtered_data[field_name] = field_value
+            filtered_data = {key: value.replace('\r', '') for key, value in filtered_data.items()}
+            if filtered_lines != []: 
+                with open(dir_arquivo+'_resultados.csv', 'a', newline='', encoding='utf-8') as file:
+                    writer = csv.DictWriter(file, fieldnames=filtered_data.keys())  
+                    writer.writerow(filtered_data)
+            if errors != []: 
+                errors_data = {'data_nascimento': linha.dt_nascimentox, 'cpf': linha.ds_cpf,'errors': errors}
+                with open(dir_arquivo+'_erros.csv', 'a', newline='', encoding='utf-8') as file:
+                    writer = csv.DictWriter(file, fieldnames=errors_data.keys())  
+                    writer.writerow(errors_data)
+            if filtered_lines == [] and errors == []:
+                errors.append("Erro desconhecido")
+                errors_data = {'data_nascimento': linha.dt_nascimentox, 'cpf': linha.ds_cpf,'errors': errors}
+                with open(dir_arquivo+'_erros.csv', 'a', newline='', encoding='utf-8') as file:
+                    writer = csv.DictWriter(file, fieldnames=errors_data.keys())  
+                    writer.writerow(errors_data)
+            time.sleep(2)
+            navegador.quit()
+            pass      
 progresso.close()
 print('Fim do processo')          

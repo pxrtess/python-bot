@@ -18,10 +18,10 @@ def clear_console():
     os.system(command)
 
 dir_arquivo = "pacientes_202402272148"
-chrome_options = Options()
-chrome_options.add_experimental_option("detach", True)
 url = "https://servicos.receita.fazenda.gov.br/Servicos/CPF/ConsultaSituacao/ConsultaPublica.asp"
 servico = Service(ChromeDriverManager().install())
+chrome_options = Options()
+chrome_options.add_experimental_option("detach", True)
 tabela = pd.read_csv('./'+dir_arquivo+'.csv', sep=',', encoding='latin-1', index_col=False, dtype=str)
 tabela.columns = [coluna.lower().replace(' ', '_').replace('.', '') for coluna in tabela.columns]
 
@@ -45,11 +45,12 @@ for linha in dados_consulta.itertuples():
             navegador.find_element(By.ID, 'txtCPF').click()
             navegador.find_element(By.ID, 'txtCPF').send_keys(linha.ds_cpf)
             navegador.find_element(By.ID, 'txtDataNascimento').send_keys(linha.dt_nascimentox)
+            time.sleep(1) 
             pg.press('tab')
             pg.press('enter')
-            time.sleep(2) 
+            time.sleep(1) 
             navegador.find_element(By.ID, 'id_submit').click()
-            time.sleep(2) 
+            time.sleep(1) 
             pg.hotkey('ctrl', 'a')
             pg.hotkey('ctrl', 'c')
             copied_text = pyperclip.paste()
